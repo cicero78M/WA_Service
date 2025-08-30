@@ -1,7 +1,7 @@
 import express from 'express';
 import cors from 'cors';
 import dotenv from 'dotenv';
-import { waClient } from './waService.js';
+import { initWA, getClient } from './waService.js';
 
 dotenv.config();
 
@@ -15,7 +15,8 @@ app.post('/send', async (req, res) => {
     return res.status(400).json({ success: false, message: 'to and message required' });
   }
   try {
-    await waClient.sendMessage(to, message, options);
+    const client = getClient();
+    await client.sendMessage(to, message, options);
     res.json({ success: true });
   } catch (err) {
     res.status(500).json({ success: false, message: err.message });
@@ -29,7 +30,8 @@ app.post('/broadcast', async (req, res) => {
     return res.status(400).json({ success: false, message: 'message required' });
   }
   try {
-    await Promise.all(targets.map(id => waClient.sendMessage(id, message)));
+    const client = getClient();
+    await Promise.all(targets.map(id => client.sendMessage(id, message)));
     res.json({ success: true, sent: targets.length });
   } catch (err) {
     res.status(500).json({ success: false, message: err.message });
@@ -37,4 +39,12 @@ app.post('/broadcast', async (req, res) => {
 });
 
 const PORT = process.env.WA_PORT || 3001;
-app.listen(PORT, () => console.log(`WA service running on port ${PORT}`));
+
+initWA()
+  .then(() => {
+    app.listen(PORT, () => console.log(`WA service running on port ${PORT}`));
+  })
+  .catch(err => {
+    console.error('Failed to initialize WhatsApp client:', err);
+    process.exit(1);
+  });
