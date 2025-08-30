@@ -1,0 +1,14 @@
+diff --git a/node_modules/whatsapp-web.js/src/Client.js b/node_modules/whatsapp-web.js/src/Client.js
+index 83ad284..5ab9f77 100644
+--- a/node_modules/whatsapp-web.js/src/Client.js
++++ b/node_modules/whatsapp-web.js/src/Client.js
+@@ -234,7 +234,8 @@ class Client extends EventEmitter {
+                      * @type {ClientInfo}
+                      */
+                 this.info = new ClientInfo(this, await this.pupPage.evaluate(() => {
+-                    return { ...window.Store.Conn.serialize(), wid: window.Store.User.getMeUser() };
++                    const getMe = window.Store.User.getMeUser || window.Store.User.getMaybeMeUser;
++                    return { ...window.Store.Conn.serialize(), wid: getMe() };
+                 }));
+ 
+                 this.interface = new InterfaceController(this);
