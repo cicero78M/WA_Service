@@ -1,8 +1,18 @@
 diff --git a/node_modules/whatsapp-web.js/src/Client.js b/node_modules/whatsapp-web.js/src/Client.js
-index 83ad284..5ab9f77 100644
+index 83ad284..eaa4548 100644
 --- a/node_modules/whatsapp-web.js/src/Client.js
 +++ b/node_modules/whatsapp-web.js/src/Client.js
-@@ -234,7 +234,8 @@ class Client extends EventEmitter {
+@@ -230,7 +230,10 @@ class Client extends EventEmitter {
+-                // Check window.Store Injection
+-                await this.pupPage.waitForFunction('window.Store != undefined');
++                // Check window.Store injection and ensure user API is ready
++                await this.pupPage.waitForFunction(
++                    'window.Store && window.Store.User && (window.Store.User.getMeUser || window.Store.User.getMaybeMeUser)'
++                );
+
+                 /**
+                      * Current connection information
+@@ -234,7 +237,8 @@ class Client extends EventEmitter {
                       * @type {ClientInfo}
                       */
                  this.info = new ClientInfo(this, await this.pupPage.evaluate(() => {
@@ -10,5 +20,5 @@ index 83ad284..5ab9f77 100644
 +                    const getMe = window.Store.User.getMeUser || window.Store.User.getMaybeMeUser;
 +                    return { ...window.Store.Conn.serialize(), wid: getMe() };
                  }));
- 
+
                  this.interface = new InterfaceController(this);
